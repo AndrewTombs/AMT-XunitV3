@@ -27,6 +27,13 @@ jobs:
       run: dotnet build --no-restore ./AMT.Xunit.V3.Tests
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal ./AMT.Xunit.V3.Tests
+      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" ./AMT.Xunit.V3.Tests
       env:
         MySettings__AppName: ${{ secrets.APP_NAME }}
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: '**/TestResults/*.trx'
