@@ -7,6 +7,15 @@ on:
     branches: [ master ]
 
   workflow_dispatch:
+    inputs:
+      test_category:
+        description: 'Test Category to run'
+        required: true
+        default: 'Smoke'
+        type: choice
+        options:
+        - Smoke
+        - Regression
 
 jobs:
   build-and-test:
@@ -27,7 +36,7 @@ jobs:
       run: dotnet build --no-restore ./AMT.Xunit.V3.Tests
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "Category=Smoke" ./AMT.Xunit.V3.Tests
+      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "Category=${{ inputs.test_category || 'Smoke' }}" ./AMT.Xunit.V3.Tests
       env:
         MySettings__AppName: ${{ secrets.APP_NAME }}
 
