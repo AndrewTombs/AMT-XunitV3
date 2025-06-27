@@ -9,10 +9,17 @@ public class DummyServiceTests
     private readonly IDummyService _dummyService;
     private readonly IConfiguration _configuration;
 
-    public DummyServiceTests(IDummyService dummyService, IConfiguration configuration)
+    public DummyServiceTests(IDummyService dummyService)
     {
         _dummyService = dummyService;
-        _configuration = configuration;
+
+        var environmentName = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+
+        _configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .AddJsonFile($"appsettings.{environmentName}.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
     }
 
     [Fact]
@@ -35,9 +42,7 @@ public class DummyServiceTests
     public void Can_Read_AppName_From_Configuration()
     {
         // Arrange
-        var environment = System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-        Console.WriteLine($"[DEBUG] Read DOTNET_ENVIRONMENT from System.Environment: '{environment}'");
-
+        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
         var expectedAppName = "My xUnit Test App"; // Default from appsettings.json
 
         if ("Test".Equals(environment, StringComparison.OrdinalIgnoreCase))
@@ -46,15 +51,9 @@ public class DummyServiceTests
             expectedAppName = "My xUnit Test App (Staging)";
         else if ("Production".Equals(environment, StringComparison.OrdinalIgnoreCase))
             expectedAppName = "My xUnit Test App (Production)";
-        else
-        {
-            Console.WriteLine("[DEBUG] DOTNET_ENVIRONMENT was null or did not match 'Test', 'Staging', or 'Production'. Using default AppName.");
-        }
 
         // Act
         var appName = _configuration["MySettings:AppName"];
-        Console.WriteLine($"[DEBUG] AppName from configuration: '{appName}'");
-        Console.WriteLine($"[DEBUG] Expected AppName: '{expectedAppName}'");
 
         // Assert
         Assert.Equal(expectedAppName, appName);
@@ -93,27 +92,7 @@ public class DummyServiceTests
         // Act & Assert
         Assert.False(string.IsNullOrEmpty(environmentSecret), "EnvironmentSecret should not be null or empty");
         Assert.False(string.IsNullOrEmpty(environmentUrl), "EnvironmentUrl should not be null or empty");
-
-        Console.WriteLine($"EnvironmentSecret: {environmentSecret}");
-        Console.WriteLine($"EnvironmentUrl: {environmentUrl}");
     }
 
-    [Fact]
-    [Trait("Category", "Smoke")]
-    public void Print_All_Configuration_Values()
-    {
-        Console.WriteLine("--- CONFIGURATION VALUES ---");
-        var allConfiguration = _configuration.AsEnumerable();
-        foreach (var (key, value) in allConfiguration)
-        {
-            Console.WriteLine($"{key}: {value}");
-        }
 
-        Console.WriteLine("\n--- ENVIRONMENT VARIABLES ---");
-        var allEnvVars = System.Environment.GetEnvironmentVariables();
-        foreach (System.Collections.DictionaryEntry de in allEnvVars)
-        {
-            Console.WriteLine($"{de.Key} = {de.Value}");
-        }
-    }
 }
