@@ -16,10 +16,20 @@ on:
         options:
         - Smoke
         - Regression
+      environment:
+        description: 'Environment to run tests against'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+        - test
+        - staging
+        - production
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'test' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -35,10 +45,17 @@ jobs:
     - name: Build
       run: dotnet build --no-restore ./AMT.Xunit.V3.Tests
 
+    - name: Echo Secret and Variable
+      run: |
+        echo "ENVIRONMENTSECRET: ${{ secrets.ENVIRONMENTSECRET }}"
+        echo "ENVIRONMENTURL: ${{ vars.ENVIRONMENTURL }}"
+
     - name: Test
       run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "Category=${{ inputs.test_category || 'Smoke' }}" ./AMT.Xunit.V3.Tests
       env:
-        MySettings__AppName: ${{ secrets.APP_NAME }}
+        DOTNET_ENVIRONMENT: ${{ inputs.environment || 'test' }}
+        ENVIRONMENTSECRET: ${{ secrets.ENVIRONMENTSECRET }}
+        ENVIRONMENTURL: ${{ vars.ENVIRONMENTURL }}
 
     - name: Upload test results
       if: always()

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -63,5 +64,33 @@ public class DummyServiceTests
 
         // Assert
         Assert.Equal(expectedTimeout, timeout);
+    }
+
+    [Fact]
+    [Trait("Category", "Smoke")]
+    public void Can_Read_Environment_Variables_From_Configuration()
+    {
+        // Arrange
+        var environmentSecret = _configuration["ENVIRONMENTSECRET"];
+        var environmentUrl = _configuration["ENVIRONMENTURL"];
+
+        // Act & Assert
+        Assert.False(string.IsNullOrEmpty(environmentSecret), "EnvironmentSecret should not be null or empty");
+        Assert.False(string.IsNullOrEmpty(environmentUrl), "EnvironmentUrl should not be null or empty");
+
+        Console.WriteLine($"EnvironmentSecret: {environmentSecret}");
+        Console.WriteLine($"EnvironmentUrl: {environmentUrl}");
+    }
+
+    [Fact]
+    [Trait("Category", "Smoke")]
+    public void Print_All_Configuration_Values()
+    {
+        var allConfiguration = _configuration.AsEnumerable();
+
+        foreach (var (key, value) in allConfiguration)
+        {
+            Console.WriteLine($"{key}: {value}");
+        }
     }
 }
