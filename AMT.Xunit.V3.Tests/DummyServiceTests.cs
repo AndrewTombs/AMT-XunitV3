@@ -71,8 +71,8 @@ public class DummyServiceTests
     public void Can_Read_Environment_Variables_From_Configuration()
     {
         // Arrange
-        var environmentSecret = _configuration["ENVIRONMENTSECRET"];
-        var environmentUrl = _configuration["ENVIRONMENTURL"];
+        var environmentSecret = _configuration["XUNIT:ENVIRONMENTSECRET"];
+        var environmentUrl = _configuration["XUNIT:ENVIRONMENTURL"];
 
         // Act & Assert
         Assert.False(string.IsNullOrEmpty(environmentSecret), "EnvironmentSecret should not be null or empty");

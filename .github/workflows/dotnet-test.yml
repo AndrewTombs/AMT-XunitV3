@@ -60,8 +60,8 @@ jobs:
         dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" $TEST_FILTER ./AMT.Xunit.V3.Tests
       env:
         DOTNET_ENVIRONMENT: ${{ inputs.environment || 'test' }}
-        ENVIRONMENTSECRET: ${{ secrets.ENVIRONMENTSECRET }}
-        ENVIRONMENTURL: ${{ vars.ENVIRONMENTURL }}
+        XUNIT__ENVIRONMENTSECRET: ${{ secrets.ENVIRONMENTSECRET }}
+        XUNIT__ENVIRONMENTURL: ${{ vars.ENVIRONMENTURL }}
 
     - name: Upload test results
       if: always()
