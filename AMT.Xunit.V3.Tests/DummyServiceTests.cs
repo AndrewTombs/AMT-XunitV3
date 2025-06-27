@@ -14,10 +14,13 @@ public class DummyServiceTests
         _dummyService = dummyService;
 
         var environmentName = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+        // On case-sensitive filesystems (like Linux), we need to match the file's case.
+        var environmentFileName = char.ToUpper(environmentName[0]) + environmentName.Substring(1);
 
         _configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .AddJsonFile($"appsettings.{environmentName}.json", optional: true)
+            .SetBasePath(AppContext.BaseDirectory) // Use the test assembly's output directory
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile($"appsettings.{environmentFileName}.json", optional: true)
             .AddEnvironmentVariables()
             .Build();
     }
@@ -86,8 +89,9 @@ public class DummyServiceTests
     public void Can_Read_Environment_Variables_From_Configuration()
     {
         // Arrange
-        var environmentSecret = _configuration["XUNIT__ENVIRONMENTSECRET"];
-        var environmentUrl = _configuration["XUNIT__ENVIRONMENTURL"];
+        // Environment variables with double underscores (__) are converted to colons (:) by the configuration provider.
+        var environmentSecret = _configuration["XUNIT:ENVIRONMENTSECRET"];
+        var environmentUrl = _configuration["XUNIT:ENVIRONMENTURL"];
 
         // Act & Assert
         Assert.False(string.IsNullOrEmpty(environmentSecret), "EnvironmentSecret should not be null or empty");
