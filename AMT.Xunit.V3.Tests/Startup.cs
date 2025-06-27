@@ -9,11 +9,13 @@ public class Startup
     public void ConfigureHost(IHostBuilder hostBuilder) =>
         hostBuilder.ConfigureAppConfiguration((context, builder) =>
         {
-            var env = context.HostingEnvironment;
+            // Explicitly get environment name from the variable we control in the workflow.
+            // This bypasses any inconsistent behavior in the test host's environment resolution.
+            var environmentName = System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
 
             // Build configuration
             builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables(); // Load all environment variables
         });
 
