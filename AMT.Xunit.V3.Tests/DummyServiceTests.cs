@@ -35,7 +35,16 @@ public class DummyServiceTests
     public void Can_Read_AppName_From_Configuration()
     {
         // Arrange
-        var expectedAppName = "My xUnit Test App";
+        // The DOTNET_ENVIRONMENT variable is automatically loaded into configuration.
+        var environment = _configuration["DOTNET_ENVIRONMENT"];
+        var expectedAppName = "My xUnit Test App"; // Default from appsettings.json
+
+        if ("Test".Equals(environment, StringComparison.OrdinalIgnoreCase))
+            expectedAppName = "My xUnit Test App (Test)";
+        else if ("Staging".Equals(environment, StringComparison.OrdinalIgnoreCase))
+            expectedAppName = "My xUnit Test App (Staging)";
+        else if ("Production".Equals(environment, StringComparison.OrdinalIgnoreCase))
+            expectedAppName = "My xUnit Test App (Production)";
 
         // Act
         var appName = _configuration["MySettings:AppName"];
@@ -71,8 +80,8 @@ public class DummyServiceTests
     public void Can_Read_Environment_Variables_From_Configuration()
     {
         // Arrange
-        var environmentSecret = _configuration["XUNIT:ENVIRONMENTSECRET"];
-        var environmentUrl = _configuration["XUNIT:ENVIRONMENTURL"];
+        var environmentSecret = _configuration["XUNIT__ENVIRONMENTSECRET"];
+        var environmentUrl = _configuration["XUNIT__ENVIRONMENTURL"];
 
         // Act & Assert
         Assert.False(string.IsNullOrEmpty(environmentSecret), "EnvironmentSecret should not be null or empty");
