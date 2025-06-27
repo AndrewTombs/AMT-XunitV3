@@ -51,7 +51,13 @@ jobs:
         echo "ENVIRONMENTURL: ${{ vars.ENVIRONMENTURL }}"
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "Category=${{ inputs.test_category || 'Smoke' }}" ./AMT.Xunit.V3.Tests
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          TEST_FILTER="--filter Category=${{ inputs.test_category }}"
+        else
+          TEST_FILTER="--filter Category=Smoke"
+        fi
+        dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" $TEST_FILTER ./AMT.Xunit.V3.Tests
       env:
         DOTNET_ENVIRONMENT: ${{ inputs.environment || 'test' }}
         ENVIRONMENTSECRET: ${{ secrets.ENVIRONMENTSECRET }}
