@@ -7,9 +7,14 @@ namespace AMT.Xunit.V3.Tests;
 public class Startup
 {
     public void ConfigureHost(IHostBuilder hostBuilder) =>
-        hostBuilder.ConfigureAppConfiguration(builder =>
+        hostBuilder.ConfigureAppConfiguration((context, builder) =>
         {
-            builder.AddJsonFile("appsettings.json");
+            var env = context.HostingEnvironment;
+
+            // Build configuration
+            builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables(); // Load all environment variables
         });
 
     public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
