@@ -35,8 +35,9 @@ public class DummyServiceTests
     public void Can_Read_AppName_From_Configuration()
     {
         // Arrange
-        // The DOTNET_ENVIRONMENT variable is automatically loaded into configuration.
-        var environment = _configuration["DOTNET_ENVIRONMENT"];
+        var environment = System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        Console.WriteLine($"[DEBUG] Read DOTNET_ENVIRONMENT from System.Environment: '{environment}'");
+
         var expectedAppName = "My xUnit Test App"; // Default from appsettings.json
 
         if ("Test".Equals(environment, StringComparison.OrdinalIgnoreCase))
@@ -45,9 +46,15 @@ public class DummyServiceTests
             expectedAppName = "My xUnit Test App (Staging)";
         else if ("Production".Equals(environment, StringComparison.OrdinalIgnoreCase))
             expectedAppName = "My xUnit Test App (Production)";
+        else
+        {
+            Console.WriteLine("[DEBUG] DOTNET_ENVIRONMENT was null or did not match 'Test', 'Staging', or 'Production'. Using default AppName.");
+        }
 
         // Act
         var appName = _configuration["MySettings:AppName"];
+        Console.WriteLine($"[DEBUG] AppName from configuration: '{appName}'");
+        Console.WriteLine($"[DEBUG] Expected AppName: '{expectedAppName}'");
 
         // Assert
         Assert.Equal(expectedAppName, appName);
@@ -95,11 +102,18 @@ public class DummyServiceTests
     [Trait("Category", "Smoke")]
     public void Print_All_Configuration_Values()
     {
+        Console.WriteLine("--- CONFIGURATION VALUES ---");
         var allConfiguration = _configuration.AsEnumerable();
-
         foreach (var (key, value) in allConfiguration)
         {
             Console.WriteLine($"{key}: {value}");
+        }
+
+        Console.WriteLine("\n--- ENVIRONMENT VARIABLES ---");
+        var allEnvVars = System.Environment.GetEnvironmentVariables();
+        foreach (System.Collections.DictionaryEntry de in allEnvVars)
+        {
+            Console.WriteLine($"{de.Key} = {de.Value}");
         }
     }
 }
